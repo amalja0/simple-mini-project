@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogContent, DialogTitle, Grid, TextField } from '@mui/material';
 import React from 'react'
 
-const FormCustomerModal = ({ open, handleClose, formikProps, disabledField=[] }) => {
+const FormCustomerModal = ({ title, open, handleClose, formikProps, disabledField=[] }) => {
   return (
     <React.Fragment>
       <Dialog 
@@ -9,7 +9,7 @@ const FormCustomerModal = ({ open, handleClose, formikProps, disabledField=[] })
         onClose={handleClose}
         fullWidth
       >
-        <DialogTitle sx={{ textAlign: 'center' }}>Add New Customer</DialogTitle>
+        <DialogTitle sx={{ textAlign: 'center' }}>{ title }</DialogTitle>
         <DialogContent>
           <form onSubmit={formikProps.handleSubmit}>
             <Grid 

@@ -13,13 +13,24 @@ export const createCustomer = async (serviceId, requestBody) => {
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 export const getCustomers = async (serviceId) => {
   BASE_URL = defineBaseUrl(serviceId);
 
   try {
     const res = await axios.get(BASE_URL + BASE_PREFIX);
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const updateCustomer = async (serviceId, costumerId, bodyRequest) => {
+  BASE_URL = defineBaseUrl(serviceId);
+
+  try {
+    const res = await axios.put(BASE_URL + BASE_PREFIX + `/${costumerId}`, bodyRequest);
     return res;
   } catch (error) {
     console.log(error);

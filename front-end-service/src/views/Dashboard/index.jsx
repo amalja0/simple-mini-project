@@ -1,4 +1,4 @@
-import { Button, Container, Grid, Tab, Tabs, Typography } from '@mui/material'
+import { Alert, Button, Container, Grid, Tab, Tabs, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import CustomerDataList from '../../components/CustomerDataList'
 import { AddCircleOutlineRounded } from '@mui/icons-material'
@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import FormCustomerModal from '../../components/FormCustomerModal';
 import { createCustomer } from '../../services';
+import { Constant } from '../../constants/constants';
 
 const initialValues = {
   nama: '',
@@ -23,6 +24,11 @@ const Dashboard = () => {
   const [tabValue, setTabValue] = useState(0);
   const [isAddingNewCustomer, setIsAddingNewCustomer] = useState(false);
   const [refreshTable, setRefreshTable] = useState(true);
+  const [alert, setAlert] = useState({
+    open: false,
+    severity: '',
+    message: ''
+  });
 
   const handleTabChange = (e, newValue) => {
     setTabValue(newValue);
@@ -44,6 +50,11 @@ const Dashboard = () => {
     createCustomer(tabValue, values)
       .then(() => {
         setRefreshTable(true);
+        setAlert({
+          open: true,
+          severity: 'success',
+          message: `Successfully creating customer using Service ${tabValue === Constant.EXPRESS_ID ? 'ExpressJs': 'NestJs'}`
+        })
       }).catch((err) => {
         setRefreshTable(false);
       }).finally(() => {
@@ -51,19 +62,46 @@ const Dashboard = () => {
       });
   }
 
+  const handleUpdateCostumer = () => {
+    setAlert({
+      open: true,
+      severity: 'success',
+      message: `Successfully updating customer using Service ${tabValue === Constant.EXPRESS_ID ? 'ExpressJs': 'NestJs'}`
+    })
+  }
+
   useEffect(() => {
-    setRefreshTable(refreshTable);
-  }, [refreshTable])
+    if (alert.open) {
+      const timeOut = setTimeout(() => {
+        setAlert({
+          open: false,
+          severity: '',
+          message: ''
+        });
+      }, 3000)
+
+      return () => {
+        clearTimeout(timeOut)
+      }
+    }
+  }, [alert])
 
   return (
     <Container>
+      <Alert 
+        severity={alert.severity} 
+        sx={{ visibility: alert.open ? 'visible' : 'hidden' }}
+      > 
+        {alert.message} 
+      </Alert>
+      
       <Grid 
         container
         spacing={4}
         flexDirection={"column"}
         alignItems={"center"} 
         justifyContent={"center"} 
-        height={'100vh'}
+        height={'95vh'}
       >
         <Grid item width={"100%"}>
           <Typography variant={"h5"} textAlign={"center"}>Customer List</Typography>
@@ -80,6 +118,7 @@ const Dashboard = () => {
               <CustomerDataList 
                 serviceID={tabValue} 
                 onRefresh={() => setRefreshTable(refreshTable)}
+                onUpdate={() => handleUpdateCostumer()}
               />
             </Grid>
             <Grid item alignSelf={"flex-end"}>
@@ -94,7 +133,9 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       </Grid>
+
       <FormCustomerModal 
+        title={'Add New Customer'}
         open={isAddingNewCustomer}
         handleClose={handleCloseAddingNewCustomer}
         formikProps={newCustomerFormik}

@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup';
 import FormCustomerModal from '../FormCustomerModal';
-import { getCustomers } from '../../services';
+import { getCustomers, updateCustomer } from '../../services';
 
 const header = [
   "ID",
@@ -40,7 +40,7 @@ const validationSchema = Yup.object().shape({
   kota: Yup.string().required(),
 });
 
-const CustomerDataList = ({ serviceID, onRefresh }) => {
+const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
   const [dataTable, setDataTable] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -48,19 +48,36 @@ const CustomerDataList = ({ serviceID, onRefresh }) => {
     initialValues: initialValues,
     validationSchema: validationSchema,
     enableReinitialize: true,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: () => {
+      handleUpdateCustomer();
       setIsUpdating(false);
     }
   });
 
-  const handleUpdate = ( id ) => {
+  const handleUpdateFormikValue = ( id ) => {
     updateCustomerFormik.setValues(dataTable[id]);
     setIsUpdating(true)
   }
 
   const handleCloseUpdateModal = () => {
     setIsUpdating(false);
+  }
+
+  const handleUpdateCustomer = () => {
+    const costumerId = updateCustomerFormik.values.id;
+
+    const requestBody = {
+      nama: updateCustomerFormik.values.nama,
+      alamat: updateCustomerFormik.values.alamat,
+      kota: updateCustomerFormik.values.kota
+    };
+
+    updateCustomer(serviceID, costumerId, requestBody)
+      .then(() => {
+        onUpdate();
+      }).catch((err) => {
+        console.log(err);
+      });
   }
 
   useEffect(() => {
@@ -72,7 +89,7 @@ const CustomerDataList = ({ serviceID, onRefresh }) => {
       }).catch((err) => {
         console.log(err);
       });
-  }, [serviceID, onRefresh])
+  }, [serviceID, onRefresh, isUpdating])
   
   const ActionButtonGroups = ({ id }) => {
     return (
@@ -80,7 +97,7 @@ const CustomerDataList = ({ serviceID, onRefresh }) => {
         <Grid item>
           <IconButton 
             color='warning'
-            onClick={() => handleUpdate(id)}
+            onClick={() => handleUpdateFormikValue(id)}
           >
             <Edit />
           </IconButton>
@@ -146,10 +163,11 @@ const CustomerDataList = ({ serviceID, onRefresh }) => {
       </TableContainer>
 
       <FormCustomerModal 
+        title={"Update Customer Data"}
         open={isUpdating}
         handleClose={handleCloseUpdateModal}
         formikProps={updateCustomerFormik}
-        disabledField={[ "id", "no" ]}
+        disabledField={[ "id", "no", "createdAt", "updatedAt" ]}
       />
     </>
   )
