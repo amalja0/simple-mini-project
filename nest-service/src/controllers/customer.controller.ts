@@ -7,7 +7,7 @@ interface CreateCustomerDto {
   kota: string
 };
 
-@Controller('customers')
+@Controller('api/customers')
 export class CustomersController {
 
   constructor(private customerService: CustomersService) {}
