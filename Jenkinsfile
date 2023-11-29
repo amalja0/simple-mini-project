@@ -42,7 +42,7 @@ pipeline {
     }
     stage("Building NestJs Service") {
       steps {
-        dir("express-service") {
+        dir("nest-service") {
           bat "npm install"
           bat "npm run start"
         }
