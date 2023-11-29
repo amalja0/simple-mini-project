@@ -10,20 +10,16 @@ pipeline {
     stage("Create Express Service ENV"){
         steps{
           dir("express-service") {
-            // script {
-            //   withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
-            //     // writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
-            //     bat 
-            //   }
-            //   def envContent = readFile file: '.env'
-            //   echo "====++++ENV FILE++++===="
-            //   echo envContent
-            // }
             script {
-                def fileContent = readFile(file: "${SECRET_FILE_EXPRESS}")
-                echo "File Content:"
-                echo fileContent
+              withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
+                writeFile file: '.env', text: readFile(file: "${SECRET_FILE_EXPRESS}")
+              }
             }
+            // script {
+            //     def fileContent = readFile(file: "${SECRET_FILE_EXPRESS}")
+            //     echo "File Content:"
+            //     echo fileContent
+            // }
           }
         }
     }
