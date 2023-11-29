@@ -7,11 +7,6 @@ pipeline {
     nodejs "NodeJS"
   }
   stages {
-    stage("Check NPM Version") {
-      steps {
-        bat "npm version"
-      }
-    }
     stage("Create Express Service ENV"){
         steps{
           dir("express-service") {
@@ -19,7 +14,8 @@ pipeline {
               withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
-              readFile file: '.env'
+              def envContent = readFile file: '.env'
+              echo envContent
             }
           }
         }
