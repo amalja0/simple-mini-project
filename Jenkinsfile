@@ -20,8 +20,7 @@ pipeline {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
             }
-
-            bat 'type $.env'
+            bat 'type .env'
           }
         }
     }
