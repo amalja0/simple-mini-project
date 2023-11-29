@@ -3,6 +3,7 @@ pipeline {
   environment {
     SECRET_FILE_EXPRESS = credentials("customer-express-env")
     SECRET_FILE_NEST = credentials("customer-nest-env")
+    SECRET_FILE_REACT = credentials("customer-react-env")
   }
   tools {
     nodejs "NodeJS"
@@ -30,6 +31,17 @@ pipeline {
         }
       }
     }
+    stage("Create React Service ENV"){
+      steps{
+        dir("front-end-service") {
+          script {
+            withCredentials([file(credentialsId: "customer-react-env", variable: "SECRET_FILE_REACT")]) {
+              writeFile file: '.env', text: readFile(file: "${SECRET_FILE_REACT}")
+            }
+          }
+        }
+      }
+    }
     stage("Build ExpressJs and NestJs Service") {
       steps {
         parallel (
@@ -45,6 +57,12 @@ pipeline {
             dir("nest-service") {
               bat "npm install"
               bat "npm run start"
+            }
+          },
+          "run react": {
+            dir("front-end-service") {
+              bat "npm install"
+              bat "npm run dev"
             }
           }
         )
