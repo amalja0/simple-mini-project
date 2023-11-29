@@ -19,6 +19,7 @@ pipeline {
               withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
+              readFile file: '.env'
             }
           }
         }
@@ -28,7 +29,7 @@ pipeline {
         dir("express-service") {
           bat "npm install"
           bat "node -r dotenv/config src/configs/db.config.js"
-          bat "node index.js"
+          // bat "node index.js"
         }
       }
     }
