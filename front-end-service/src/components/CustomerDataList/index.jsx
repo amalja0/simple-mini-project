@@ -1,10 +1,10 @@
-import { DeleteForever, Edit } from '@mui/icons-material';
-import { Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { CloseOutlined, DeleteForever, Edit, SearchRounded } from '@mui/icons-material';
+import { Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup';
 import FormCustomerModal from '../FormCustomerModal';
-import { getCustomers, updateCustomer } from '../../services';
+import { deleteCustomer, getCustomerById, getCustomers, updateCustomer } from '../../services';
 
 const header = [
   "ID",
@@ -40,9 +40,12 @@ const validationSchema = Yup.object().shape({
   kota: Yup.string().required(),
 });
 
-const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
+const CustomerDataList = ({ serviceID, onRefresh, onUpdate, onDelete }) => {
   const [dataTable, setDataTable] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [searchedId, setSearchedId] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [isDataNotFound, setIsDataNotFound] = useState(false);
 
   const updateCustomerFormik = useFormik({
     initialValues: initialValues,
@@ -54,8 +57,8 @@ const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
     }
   });
 
-  const handleUpdateFormikValue = ( id ) => {
-    updateCustomerFormik.setValues(dataTable[id]);
+  const handleUpdateFormikValue = ( index ) => {
+    updateCustomerFormik.setValues(dataTable[index]);
     setIsUpdating(true)
   }
 
@@ -63,24 +66,7 @@ const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
     setIsUpdating(false);
   }
 
-  const handleUpdateCustomer = () => {
-    const costumerId = updateCustomerFormik.values.id;
-
-    const requestBody = {
-      nama: updateCustomerFormik.values.nama,
-      alamat: updateCustomerFormik.values.alamat,
-      kota: updateCustomerFormik.values.kota
-    };
-
-    updateCustomer(serviceID, costumerId, requestBody)
-      .then(() => {
-        onUpdate();
-      }).catch((err) => {
-        console.log(err);
-      });
-  }
-
-  useEffect(() => {
+  const handleGetAllCustomers = () => {
     getCustomers(serviceID)
       .then((res) => {
         if (res.status === 200) {
@@ -89,21 +75,83 @@ const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
       }).catch((err) => {
         console.log(err);
       });
-  }, [serviceID, onRefresh, isUpdating])
+  }
+
+  const handleUpdateCustomer = () => {
+    const customerId = updateCustomerFormik.values.id;
+
+    const requestBody = {
+      nama: updateCustomerFormik.values.nama,
+      alamat: updateCustomerFormik.values.alamat,
+      kota: updateCustomerFormik.values.kota
+    };
+
+    updateCustomer(serviceID, customerId, requestBody)
+      .then(() => {
+        onUpdate();
+      }).catch((err) => {
+        console.log(err);
+      });
+  }
+
+  const handleDeleteCustomer = ( index ) => {
+    const customerId = dataTable[index].id;
+
+    deleteCustomer(serviceID, customerId)
+      .then(() => {
+        onDelete()
+      }).catch((err) => {
+        console.log(err);
+      });
+  }
+
+  const handleSearchCustomer = () => {
+    if(searchedId !== '') {
+      setIsSearching(true);
+      getCustomerById(serviceID, searchedId)
+        .then((res) => {
+          if (res.status === 200 && Object.keys(res.data).length > 0) {
+            setIsDataNotFound(false);
+            setDataTable([res.data]);
+          } else {
+            setIsDataNotFound(true);
+          }
+        }).catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+
+  const handleCloseSearching= () => {
+    setIsSearching(false);
+    setSearchedId('');
+    handleGetAllCustomers();
+  }
+
+  useEffect(() => {
+    handleGetAllCustomers();
+  }, [serviceID, onRefresh, isUpdating, onDelete]);
+
+  useEffect(() => {
+    setSearchedId('');
+  }, [serviceID]);
   
-  const ActionButtonGroups = ({ id }) => {
+  const ActionButtonGroups = ({ index }) => {
     return (
       <Grid container>
         <Grid item>
           <IconButton 
             color='warning'
-            onClick={() => handleUpdateFormikValue(id)}
+            onClick={() => handleUpdateFormikValue(index)}
           >
             <Edit />
           </IconButton>
         </Grid>
         <Grid item>
-          <IconButton color='error'>
+          <IconButton 
+            color='error'
+            onClick={() => handleDeleteCustomer(index)}
+          >
             <DeleteForever />
           </IconButton>
         </Grid>
@@ -113,7 +161,45 @@ const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ maxHeight: 400, boxShadow: 'none'}}>
+      <TextField
+        fullWidth
+        variant='filled'
+        placeholder='Search by id'
+        value={searchedId}
+        onChange={(e) => setSearchedId(e.target.value)}
+        sx={{
+          backgroundColor: 'primary.main',
+          borderTopLeftRadius: '8px',
+          borderTopRightRadius: '8px',
+        }}
+        inputProps={{
+          sx: {
+            paddingY: '1rem',
+            color: 'primary.contrastText'
+          },
+        }}
+        InputProps={{
+          endAdornment: (
+            isSearching 
+            ? (
+              <IconButton
+                sx={{ color: 'primary.contrastText' }}
+                onClick={handleCloseSearching}
+              >
+                <CloseOutlined />
+              </IconButton>
+            ) : (
+              <IconButton 
+                sx={{ color: 'primary.contrastText' }}
+                onClick={handleSearchCustomer}
+              >
+                <SearchRounded />
+              </IconButton>
+            )
+          )
+        }}
+      />
+      <TableContainer component={Paper} sx={{ maxHeight: 375, boxShadow: 'none'}}>
         <Table sx={{ width: '100%' }} stickyHeader>
           <TableHead>
             <TableRow>
@@ -138,25 +224,34 @@ const CustomerDataList = ({ serviceID, onRefresh, onUpdate }) => {
           </TableHead>
           <TableBody>
             {
-              dataTable.map((row, index) => {
-                return (
-                  <TableRow key={index}>
-                    {
-                      structure.map((column) => {
-                        return (
-                          <TableCell>
-                            {
-                              column === 'aksi' 
-                              ? <ActionButtonGroups id={index} />
-                              : <Typography>{row[column.toLowerCase()]}</Typography>
-                            }
-                          </TableCell>
-                        )
-                      })
-                    }
-                  </TableRow>
-                )
-              })
+              isSearching && isDataNotFound 
+              ? (
+                <TableRow>
+                  <TableCell colSpan={header.length} align={"center"}>
+                    <Typography>No Customer Found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                dataTable.map((row, index) => {
+                  return (
+                    <TableRow key={index}>
+                      {
+                        structure.map((column) => {
+                          return (
+                            <TableCell>
+                              {
+                                column === 'aksi' 
+                                ? <ActionButtonGroups index={index} />
+                                : <Typography>{row[column.toLowerCase()]}</Typography>
+                              }
+                            </TableCell>
+                          )
+                        })
+                      }
+                    </TableRow>
+                  )
+                })
+              )
             }
           </TableBody>
         </Table>

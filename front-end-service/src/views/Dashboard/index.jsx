@@ -62,11 +62,19 @@ const Dashboard = () => {
       });
   }
 
-  const handleUpdateCostumer = () => {
+  const handleUpdateCustomer = () => {
     setAlert({
       open: true,
       severity: 'success',
       message: `Successfully updating customer using Service ${tabValue === Constant.EXPRESS_ID ? 'ExpressJs': 'NestJs'}`
+    })
+  }
+
+  const handleDeleteCustomer = () => {
+    setAlert({
+      open: true,
+      severity: 'success',
+      message: `Successfully deleting customer using Service ${tabValue === Constant.EXPRESS_ID ? 'ExpressJs': 'NestJs'}`
     })
   }
 
@@ -118,7 +126,8 @@ const Dashboard = () => {
               <CustomerDataList 
                 serviceID={tabValue} 
                 onRefresh={() => setRefreshTable(refreshTable)}
-                onUpdate={() => handleUpdateCostumer()}
+                onUpdate={() => handleUpdateCustomer()}
+                onDelete={() => handleDeleteCustomer()}
               />
             </Grid>
             <Grid item alignSelf={"flex-end"}>

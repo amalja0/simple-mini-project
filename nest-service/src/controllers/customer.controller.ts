@@ -30,9 +30,9 @@ export class CustomersController {
     return customers;
   }
 
-  @Get(':nama')
-  async findByNama(@Param('nama') nama: string ) {
-    const customer: CustomerInterface = await this.customerService.findByNama(nama);
+  @Get(':id')
+  async findByNama(@Param('id') id: string ) {
+    const customer: CustomerInterface = await this.customerService.findById(id);
 
     return customer;
   }

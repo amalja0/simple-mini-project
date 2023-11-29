@@ -5,6 +5,7 @@ import { Customer } from "src/entities/Customer.entity";
 import { Repository } from "typeorm";
 
 export interface CustomerInterface {
+  id?: string,
   no?: string, 
   nama: string,
   alamat: string,
@@ -33,11 +34,11 @@ export class CustomersService {
     return this.customerRepository.find();
   }
 
-  findByNama(nama: string): Promise<CustomerInterface> {
+  findById(id: string): Promise<CustomerInterface> {
     return this.customerRepository
       .findOne({
         where: {
-          nama: nama
+          id: id
         }
       });
   }
