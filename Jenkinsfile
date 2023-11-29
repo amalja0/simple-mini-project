@@ -15,6 +15,7 @@ pipeline {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
               def envContent = readFile file: '.env'
+              echo "====++++ENV FILE++++===="
               echo envContent
             }
           }
