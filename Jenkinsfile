@@ -15,11 +15,6 @@ pipeline {
                 writeFile file: '.env', text: readFile(file: "${SECRET_FILE_EXPRESS}")
               }
             }
-            // script {
-            //     def fileContent = readFile(file: "${SECRET_FILE_EXPRESS}")
-            //     echo "File Content:"
-            //     echo fileContent
-            // }
           }
         }
     }
@@ -28,7 +23,7 @@ pipeline {
         dir("express-service") {
           bat "npm install"
           bat "node -r dotenv/config src/configs/db.config.js"
-          // bat "node index.js"
+          bat "node index.js"
         }
       }
     }
