@@ -22,6 +22,7 @@ pipeline {
       steps {
         dir("express-service") {
           bat "npm install"
+          bat "node -r dotenv/config index.js"
           bat "node -r dotenv/config src/configs/db.config.js"
           bat "node index.js"
         }
