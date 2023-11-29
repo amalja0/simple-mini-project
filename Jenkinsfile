@@ -19,16 +19,6 @@ pipeline {
           }
         }
     }
-    stage("Build ExpressJs Service") {
-      steps {
-        dir("express-service") {
-          bat "npm install"
-          bat "node -r dotenv/config index.js"
-          bat "node -r dotenv/config src/configs/db.config.js"
-          bat "node index.js"
-        }
-      }
-    }
     stage("Create NestJs Service ENV"){
       steps{
         dir("nest-service") {
@@ -40,12 +30,25 @@ pipeline {
         }
       }
     }
-    stage("Building NestJs Service") {
+    stage("Build ExpressJs and NestJs Service") {
       steps {
-        dir("nest-service") {
-          bat "npm install"
-          bat "npm run start"
-        }
+        parallel (
+          "run express" : {
+            dir("express-service") {
+              bat "npm install"
+              bat "node -r dotenv/config index.js"
+              bat "node -r dotenv/config src/configs/db.config.js"
+              bat "node index.js"
+            }
+          },
+          "run nest": {
+            dir("nest-service") {
+              bat "npm install"
+              bat "npm run start"
+            }
+          }
+        )
+        
       }
     }
   }
