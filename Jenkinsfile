@@ -21,7 +21,7 @@ pipeline {
               }
             }
 
-            bat 'cat $.env'
+            bat 'type $.env'
           }
         }
     }
