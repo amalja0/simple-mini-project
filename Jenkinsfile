@@ -14,11 +14,15 @@ pipeline {
     }
     stage("Create Express Service ENV"){
         steps{
+          dir("express-service") {
             script {
               withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
             }
+
+            bat 'cat $.env'
+          }
         }
     }
     stage("Build Express Service") {
