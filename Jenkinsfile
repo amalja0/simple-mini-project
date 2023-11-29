@@ -15,7 +15,7 @@ pipeline {
     stage("Create Express Service ENV"){
         steps{
             script {
-              withCredentials([string(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
+              withCredentials([file(credentialsId: "customer-express-env", variable: "SECRET_FILE_EXPRESS")]) {
                 writeFile file: '.env', text: "${SECRET_FILE_EXPRESS}"
               }
             }
